@@ -1,0 +1,2 @@
+/home/kaio/Área de Trabalho/Storage/Programacao/Python/spotify downloader/musicas
+/home/kaio/Área de Trabalho/musicas
