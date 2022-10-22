@@ -2,8 +2,6 @@
 #include "./ui_player.h"
 #include "ui_player.h"
 
-#include <iostream> // tirar dps
-
 Player::Player(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::Player)
@@ -27,8 +25,15 @@ Player::Player(QWidget *parent)
     connect(tocador, &QMediaPlayer::durationChanged, this, &Player::durationChanged); // setting progress bar limit
     connect(tocador, &QMediaPlayer::positionChanged, this, &Player::positionChanged); // changing progress bar value
 
+    connect(ui->random, &QCheckBox::toggled, this, &Player::addToPlaylist); // testar depois
+
+    // changing the widget pages
     connect(ui->playlist_page, &QPushButton::clicked, this, &Player::changeToPlaylist);
     connect(ui->home_page, &QPushButton::clicked, this, &Player::changeToHome);
+
+    // music
+    connect(ui->progressBar, &QSlider::sliderPressed, this, &Player::sliderStart);
+    connect(ui->progressBar, &QSlider::sliderReleased, this, &Player::sliderEnd);
 }
 
 Player::~Player()
@@ -56,6 +61,7 @@ void Player::addItems(){
 
 void Player::addToPlaylist(){
     playlist.clear();
+    ui->playlist_list->clear();
 
     if (ui->random->isChecked()) { // random
         std::vector<int> indexes;
@@ -78,6 +84,9 @@ void Player::addToPlaylist(){
         for (int c = ui->m_list->currentRow() + 1; c < ui->m_list->count(); c++){
             playlist.push_back(ui->m_list->item(c)->text());
         }
+    }
+    for (const QString& c : playlist){
+        ui->playlist_list->addItem(c);
     }
 }
 
@@ -103,6 +112,7 @@ void Player::play(){
         tocador->play();
 
         currentMusic = ui->m_list->currentItem()->text().toStdString();
+        ui->current_music_label->setText(QString::fromStdString(currentMusic));
     }
 }
 
@@ -120,7 +130,7 @@ void Player::play_button() {
 }
 
 void Player::positionChanged(qint64 value){
-    ui->progressBar->setValue(value / 1000); // mudar para QSlider depois
+    ui->progressBar->setValue(value / 1000);
     if (ui->progressBar->value() == ui->progressBar->maximum()){
         ui->m_list->setCurrentItem(ui->m_list->findItems(playlist.back(), Qt::MatchExactly).back());
         this->play();
@@ -136,6 +146,15 @@ void Player::volumeChanged(double value){ // convert to double (the setVolume fu
     audioOutput->setVolume(value / 100);
 }
 
+void Player::sliderStart(){
+    tocador->pause();
+}
+
+void Player::sliderEnd(){
+    tocador->setPosition(ui->progressBar->value() * 1000);
+    tocador->play();
+}
+
 // Mexendo com páginas
 
 void Player::changeToPlaylist(){
@@ -145,3 +164,5 @@ void Player::changeToPlaylist(){
 void Player::changeToHome(){
     ui->stackedWidget->setCurrentIndex(0);
 }
+
+/* Playlist Page */

@@ -35,8 +35,12 @@ private slots:
     void durationChanged(qint64);
     void volumeChanged(double);
     void addToPlaylist();
+
     void changeToPlaylist();
     void changeToHome();
+
+    void sliderStart();
+    void sliderEnd();
 
 private:
     void addItems();
@@ -50,6 +54,5 @@ private:
     std::string currentMusic; // mudar pra QString depois
     std::map<std::string, std::string> path_to_music;
     std::vector<QString> playlist;
-
 };
 #endif // PLAYER_H
