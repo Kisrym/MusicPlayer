@@ -33,14 +33,19 @@ private slots:
     void play_button();
     void positionChanged(qint64);
     void durationChanged(qint64);
+    void musicEnded_slot();
     void volumeChanged(double);
     void addToPlaylist();
+    void editPlaylist();
 
     void changeToPlaylist();
     void changeToHome();
 
     void sliderStart();
     void sliderEnd();
+
+signals:
+    void musicEnded_signal();
 
 private:
     void addItems();

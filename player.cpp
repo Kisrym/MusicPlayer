@@ -2,6 +2,8 @@
 #include "./ui_player.h"
 #include "ui_player.h"
 
+#include <QMouseEvent>
+
 Player::Player(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::Player)
@@ -25,7 +27,7 @@ Player::Player(QWidget *parent)
     connect(tocador, &QMediaPlayer::durationChanged, this, &Player::durationChanged); // setting progress bar limit
     connect(tocador, &QMediaPlayer::positionChanged, this, &Player::positionChanged); // changing progress bar value
 
-    connect(ui->random, &QCheckBox::toggled, this, &Player::addToPlaylist); // testar depois
+    connect(ui->random, &QCheckBox::toggled, this, &Player::addToPlaylist);
 
     // changing the widget pages
     connect(ui->playlist_page, &QPushButton::clicked, this, &Player::changeToPlaylist);
@@ -34,6 +36,9 @@ Player::Player(QWidget *parent)
     // music
     connect(ui->progressBar, &QSlider::sliderPressed, this, &Player::sliderStart);
     connect(ui->progressBar, &QSlider::sliderReleased, this, &Player::sliderEnd);
+
+    connect(ui->save, &QPushButton::pressed, this, &Player::editPlaylist);
+    connect(this, &Player::musicEnded_signal, this, &Player::musicEnded_slot);
 }
 
 Player::~Player()
@@ -131,11 +136,22 @@ void Player::play_button() {
 
 void Player::positionChanged(qint64 value){
     ui->progressBar->setValue(value / 1000);
-    if (ui->progressBar->value() == ui->progressBar->maximum()){
-        ui->m_list->setCurrentItem(ui->m_list->findItems(playlist.back(), Qt::MatchExactly).back());
-        this->play();
-        playlist.pop_back();
+
+    if (ui->progressBar->value() == ui->progressBar->maximum() && !playlist.empty()){
+        emit musicEnded_signal();
     }
+}
+
+void Player::musicEnded_slot(){
+    ui->m_list->setCurrentItem(ui->m_list->findItems(playlist.front(), Qt::MatchExactly).at(0));
+    ui->playlist_list->removeItemWidget(ui->playlist_list->findItems(playlist.front(), Qt::MatchExactly).at(0));
+
+    if (!ui->playlist_list->findItems(playlist.front(), Qt::MatchExactly).empty()){
+        delete ui->playlist_list->findItems(playlist.front(), Qt::MatchExactly).at(0);
+    }
+
+    this->play();
+    playlist.erase(playlist.begin());
 }
 
 void Player::durationChanged(qint64 value){
@@ -155,7 +171,7 @@ void Player::sliderEnd(){
     tocador->play();
 }
 
-// Mexendo com páginas
+/*Mexendo com páginas */
 
 void Player::changeToPlaylist(){
     ui->stackedWidget->setCurrentIndex(1);
@@ -166,3 +182,10 @@ void Player::changeToHome(){
 }
 
 /* Playlist Page */
+void Player::editPlaylist(){
+    playlist.clear();
+
+    for (int c = 0; c < ui->playlist_list->count(); c++){
+        playlist.push_back(ui->playlist_list->item(c)->text());
+    }
+}
