@@ -16,16 +16,20 @@ Player::Player(QWidget *parent)
     tocador->setAudioOutput(audioOutput); // setting audio output
     isPaused = false;
     currentMusic = "";
+    last_song = "";
 
     connect(ui->play_button, &QPushButton::clicked, this, &Player::play_button); // play/pause
     connect(ui->m_list, &QListWidget::itemDoubleClicked, this, &Player::play); // doubleclick play
     connect(ui->m_list, &QListWidget::itemDoubleClicked, this, &Player::addToPlaylist); // adding the music in the playlist
+    connect(ui->save, &QPushButton::pressed, this, &Player::editPlaylist); // editing the playlist
 
     connect(ui->volume, &QSlider::valueChanged, this, &Player::volumeChanged); // changing volume
+    connect(ui->loop, &QCheckBox::clicked, this, &Player::setLoop);
     connect(ui->add_source, &QPushButton::clicked, this, &Player::addSources);
 
     connect(tocador, &QMediaPlayer::durationChanged, this, &Player::durationChanged); // setting progress bar limit
     connect(tocador, &QMediaPlayer::positionChanged, this, &Player::positionChanged); // changing progress bar value
+    connect(this, &Player::musicEnded_signal, this, &Player::musicEnded_slot);
 
     connect(ui->random, &QCheckBox::toggled, this, &Player::addToPlaylist);
 
@@ -33,12 +37,12 @@ Player::Player(QWidget *parent)
     connect(ui->playlist_page, &QPushButton::clicked, this, &Player::changeToPlaylist);
     connect(ui->home_page, &QPushButton::clicked, this, &Player::changeToHome);
 
-    // music
+    // slides over the music position
     connect(ui->progressBar, &QSlider::sliderPressed, this, &Player::sliderStart);
     connect(ui->progressBar, &QSlider::sliderReleased, this, &Player::sliderEnd);
 
-    connect(ui->save, &QPushButton::pressed, this, &Player::editPlaylist);
-    connect(this, &Player::musicEnded_signal, this, &Player::musicEnded_slot);
+    connect(ui->back, &QPushButton::clicked, this, &Player::back);
+    connect(ui->forward, &QPushButton::clicked, this, &Player::skip);
 }
 
 Player::~Player()
@@ -142,16 +146,28 @@ void Player::positionChanged(qint64 value){
     }
 }
 
-void Player::musicEnded_slot(){
-    ui->m_list->setCurrentItem(ui->m_list->findItems(playlist.front(), Qt::MatchExactly).at(0));
-    ui->playlist_list->removeItemWidget(ui->playlist_list->findItems(playlist.front(), Qt::MatchExactly).at(0));
+void Player::musicEnded_slot(bool back){
+    if (!ui->loop->isChecked()){
+        ui->m_list->setCurrentItem(ui->m_list->findItems(playlist.front(), Qt::MatchExactly).at(0));
 
-    if (!ui->playlist_list->findItems(playlist.front(), Qt::MatchExactly).empty()){
-        delete ui->playlist_list->findItems(playlist.front(), Qt::MatchExactly).at(0);
+        auto current_music = ui->playlist_list->findItems(playlist.front(), Qt::MatchExactly);
+
+        if (!current_music.empty()){
+            if (current_music.at(0)->text() != last_song){ // arrumar isso dps
+                last_song = current_music.at(0)->text();
+            }
+            ui->playlist_list->removeItemWidget(current_music.at(0));
+            delete current_music.at(0);
+        }
+
+        this->play();
+        if (!back){ // if you didn't click the "back" button
+            playlist.erase(playlist.begin());
+        }
     }
-
-    this->play();
-    playlist.erase(playlist.begin());
+    else {
+        tocador->setPosition(0);
+    }
 }
 
 void Player::durationChanged(qint64 value){
@@ -171,8 +187,30 @@ void Player::sliderEnd(){
     tocador->play();
 }
 
-/*Mexendo com páginas */
+void Player::setLoop(bool condition){
+    if (condition){
+        tocador->setLoops(-1); // infinite loop
+    }
+    else {
+        tocador->setLoops(1);
+    }
+}
 
+void Player::back(){
+    qDebug() << "ativando sinal";
+
+    qDebug() << playlist;
+    playlist.insert(playlist.begin(), last_song);
+    qDebug() << playlist;
+    emit musicEnded_signal(true);
+    qDebug() << playlist;
+}
+
+void Player::skip(){
+    emit musicEnded_signal();
+}
+
+/*Mexendo com páginas */
 void Player::changeToPlaylist(){
     ui->stackedWidget->setCurrentIndex(1);
 }

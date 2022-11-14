@@ -33,19 +33,23 @@ private slots:
     void play_button();
     void positionChanged(qint64);
     void durationChanged(qint64);
-    void musicEnded_slot();
+    void musicEnded_slot(bool back = false);
+
     void volumeChanged(double);
     void addToPlaylist();
     void editPlaylist();
+    void setLoop(bool);
 
     void changeToPlaylist();
     void changeToHome();
 
     void sliderStart();
     void sliderEnd();
+    void back();
+    void skip();
 
 signals:
-    void musicEnded_signal();
+    void musicEnded_signal(bool back = false);
 
 private:
     void addItems();
@@ -59,5 +63,6 @@ private:
     std::string currentMusic; // mudar pra QString depois
     std::map<std::string, std::string> path_to_music;
     std::vector<QString> playlist;
+    QString last_song;
 };
 #endif // PLAYER_H

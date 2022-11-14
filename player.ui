@@ -147,6 +147,28 @@
       <height>23</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true">QSlider::sub-page::Horizontal:hover{
+	background-color: rgb(46, 194, 126);
+}
+QSlider::handle::Horizontal:hover{
+	background-color: rgb(46, 194, 126);
+}
+
+QSlider::handle::Horizontal{
+	width:7px;
+	border-radius:5px;
+	background:rgb(255, 255, 255);
+	margin: -5px 0px -5px 0px;
+}
+
+QSlider::sub-page:Horizontal {
+	background-color: rgb(255,255,255);
+}</string>
+    </property>
+    <property name="value">
+     <number>17</number>
+    </property>
     <property name="orientation">
      <enum>Qt::Horizontal</enum>
     </property>
@@ -154,20 +176,23 @@
    <widget class="QCheckBox" name="random">
     <property name="geometry">
      <rect>
-      <x>350</x>
+      <x>320</x>
       <y>360</y>
       <width>80</width>
       <height>23</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true">border-image: url(:image/icons/random.png);</string>
+    </property>
     <property name="text">
-     <string>Random</string>
+     <string/>
     </property>
    </widget>
    <widget class="QPushButton" name="play_button">
     <property name="geometry">
      <rect>
-      <x>470</x>
+      <x>460</x>
       <y>340</y>
       <width>61</width>
       <height>51</height>
@@ -210,6 +235,45 @@
     </property>
     <property name="text">
      <string>Add dir...</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="loop">
+    <property name="geometry">
+     <rect>
+      <x>600</x>
+      <y>360</y>
+      <width>83</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Loop</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="back">
+    <property name="geometry">
+     <rect>
+      <x>400</x>
+      <y>360</y>
+      <width>51</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Voltar</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="forward">
+    <property name="geometry">
+     <rect>
+      <x>535</x>
+      <y>360</y>
+      <width>51</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Avançar</string>
     </property>
    </widget>
   </widget>
